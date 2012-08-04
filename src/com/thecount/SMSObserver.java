@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -32,6 +31,50 @@ public class SMSObserver extends ContentObserver
 		super(handler);
 		_context = context;
 	}
+	
+	/*
+	 * TODO finish this
+	
+	public void initDay()
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	    
+	    Calendar now = Calendar.getInstance();
+	    now.setTime(now.getTime());
+		
+		Cursor cur = _context.getContentResolver().query(SMS_STATUS_URI, null, null, null, null);
+		
+		cur.moveToFirst();
+		
+		csqlHelper = new SQLite(_context.getApplicationContext());
+		
+		csqlWrite = csqlHelper.getWritableDatabase();
+		
+		csqlWrite.execSQL("delete from counts where date = '"+sdf.format(now.getTime())+"'");
+		csqlWrite.execSQL("insert into counts values ('"+sdf.format(now.getTime())+"',0)");
+		
+		while (!cur.isAfterLast())
+		{
+			String protocol = cur.getString(cur.getColumnIndex("protocol")); //protocol
+    		
+			if (protocol == null)
+			{
+	    	    Calendar smsSent = Calendar.getInstance();
+	    	    
+	    		smsSent.setTime(new Date(cur.getLong(cur.getColumnIndex("date"))));
+	    		
+	    		if ((now.get(Calendar.DAY_OF_MONTH) - smsSent.get(Calendar.DAY_OF_MONTH) == 0) &&
+	    				(now.get(Calendar.MONTH) - smsSent.get(Calendar.MONTH) == 0) &&
+	    				(now.get(Calendar.YEAR) - smsSent.get(Calendar.YEAR) == 0))
+	    		{
+	    			
+	    		}
+			}
+			
+    		
+		}
+	}
+	*/
 	
 	@Override
 	public boolean deliverSelfNotifications()
@@ -64,8 +107,6 @@ public class SMSObserver extends ContentObserver
 		    	smsIds.clear();
 	    	smsIds.add(id);
 	    }
-	    
-	    
 	    
 	    String protocol = cur.getString(cur.getColumnIndex("protocol")); //protocol
 	    if (protocol == null)
