@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
@@ -16,6 +18,10 @@ import android.widget.Toast;
 public class SMSObserver extends ContentObserver
 {
 	private Context _context;
+	
+	SQLite csqlHelper;
+	SQLiteDatabase csqlRead;
+	SQLiteDatabase csqlWrite;
 	
     static final Uri SMS_STATUS_URI = Uri.parse("content://sms");
     
@@ -40,32 +46,68 @@ public class SMSObserver extends ContentObserver
 		
 	    cur.moveToNext();
 	    
-	    String time = cur.getString(cur.getColumnIndex("date")); //date
-	    String id = cur.getString(cur.getColumnIndex("_id")); //id
+	    String id = cur.getString(cur.getColumnIndex("_id"));
+	    
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	    
 	    Calendar now = Calendar.getInstance();
+	    Calendar smsSent = Calendar.getInstance();
+	    
 		now.setTime(now.getTime());
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-		
-		Date smsSentDate = new Date(cur.getLong(cur.getColumnIndex("date")));
-		Date todaysDate = now.getTime();
-		
-	    Log.v("thecount","diff:"+(todaysDate.getDay() - smsSentDate.getDay()));
+		smsSent.setTime(new Date(cur.getLong(cur.getColumnIndex("date"))));
 	    
 	    if (smsIds.contains(id))
 	    	return;
 	    else
 	    {
-	    	if (smsIds.size() > 10)
+	    	if (smsIds.size() == 10)
 		    	smsIds.clear();
 	    	smsIds.add(id);
 	    }
 	    
+	    
+	    
 	    String protocol = cur.getString(cur.getColumnIndex("protocol")); //protocol
 	    if (protocol == null)
+	    {
 	    	Toast.makeText(_context.getApplicationContext(), "Sending",Toast.LENGTH_SHORT).show();
-	    else Toast.makeText(_context.getApplicationContext(), "Receiving", Toast.LENGTH_SHORT).show();
+	    	
+	    	try
+	    	{
+	    		csqlHelper = new SQLite(_context.getApplicationContext());
+	    		
+	    		csqlRead = csqlHelper.getReadableDatabase();
+	    		csqlWrite = csqlHelper.getWritableDatabase();
+	    		
+	    		Cursor c = csqlRead.rawQuery("select count from counts where date = '"+sdf.format(smsSent.getTime())+"'", null);
+	    		
+	    		if (c.getCount() == 0)
+	    		{
+	    			Log.v("thecount", "first insert");
+	    			
+	    			csqlWrite.execSQL("insert into counts values ('"+sdf.format(smsSent.getTime())+"',1)");
+	    		}
+	    		
+	    		else
+	    		{
+	    			c.moveToFirst();
+	    			
+	    			int count = Integer.parseInt(c.getString(c.getColumnIndex("count")));
+	    			
+	    			csqlWrite.execSQL("update counts set count = "+(count+1)+" where date ='"+sdf.format(smsSent.getTime())+"'");
+	    			
+	    			Log.v("thecount", "Updating");
+	    		}
+	    		
+	    		csqlRead.close();
+	    	}
+	    	catch (Exception ex)
+	    	{
+	    		ex.printStackTrace();
+	    	}
+	    	
+	    }
+	    //else Toast.makeText(_context.getApplicationContext(), "Receiving", Toast.LENGTH_SHORT).show();
 		
 		super.onChange(selfChange);
 	}

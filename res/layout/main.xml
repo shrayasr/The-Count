@@ -4,9 +4,24 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:layout_width="fill_parent"
+    <Button
+        android:id="@+id/initButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:text="initialize database" />
+
+    <TextView
+        android:id="@+id/todayTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/sentTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </LinearLayout>
